@@ -1,0 +1,104 @@
+smtpd_banner = ESMTP mail.server.ru
+biff = no
+append_dot_mydomain = no
+queue_directory = /var/spool/postfix
+myhostname = mail.server.ru
+alias_maps = hash:/etc/postfix/map/aliases
+mydestination = mail.server.ru
+transport_maps = hash:/etc/postfix/map/transport
+mydomain = mail.server.ru
+mynetworks = 127.0.0.0/8
+mailbox_size_limit = 0
+message_size_limit = 51200000
+recipient_delimiter = +
+inet_interfaces = all
+smtpd_helo_required = yes
+smtpd_delay_reject = yes
+header_checks = regexp:/etc/postfix/map/headerchecks
+smtpd_sender_login_maps = hash:/etc/postfix/map/login_accordance_email
+policy-spf_time_limit = 3660s
+# ============================================================
+# SSL
+# ============================================================
+
+# ============================================================
+# SASL
+# ============================================================
+smtpd_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl-passwords
+smtp_sasl_mechanism_filter = login plain
+smtpd_sasl_security_options = noanonymous
+broken_sasl_auth_clients = yes
+#smtpd_sasl_path = /var/spool/postfix/var/run/saslauthd
+# ============================================================
+# VIRTUAL
+# ============================================================
+#virtual_mailbox_domains = mail.server.ru
+virtual_mailbox_base = MailBox/boxs
+virtual_mailbox_maps = hash:/etc/postfix/map/virtual_mailbox_recipients
+virtual_minimum_uid = 100
+virtual_uid_maps = static:5000
+virtual_gid_maps = static:5000
+#virtual_alias_maps = hash:/etc/postfix/virtual_mailbox_aliaces
+home_mailbox = /
+#============================================================
+# RECIPIENTS
+#============================================================
+#local_recipient_maps = hash:/etc/postfix/map/users
+#============================================================
+# FORWARD
+#============================================================
+#recipient_bcc_maps = hash:/etc/postfix/recipient_bcc
+#============================================================
+#Clent (IP address or hostname)
+#============================================================
+smtpd_client_restrictions =
+        permit_sasl_authenticated
+        check_client_access hash:/etc/postfix/map/client_access
+        reject_unknown_client
+        reject_unknown_client_hostname
+        reject_rbl_client
+        reject_rhsbl_client
+        permit
+#============================================================
+# HELO/EHLO
+#============================================================
+smtpd_helo_restrictions =
+        permit_sasl_authenticated
+        check_helo_access hash:/etc/postfix/map/helo_checks
+        permit_mynetworks
+        reject_invalid_helo_hostname
+        reject_non_fqdn_helo_hostname
+        reject_unknown_helo_hostname
+        permit
+#============================================================
+# MAIL FROM:
+#============================================================
+smtpd_sender_restrictions =
+        permit_sasl_authenticated
+        #check_policy_service unix:private/policy-spf
+        check_client_access hash:/etc/postfix/map/client_access
+        check_sender_access hash:/etc/postfix/map/sender_access
+        reject_authenticated_sender_login_mismatch
+        reject_non_fqdn_sender
+        reject_rhsbl_sender
+        reject_sender_login_mismatch
+        reject_unknown_sender_domain
+        reject_unverified_sender
+        reject_unlisted_sender
+        permit
+#============================================================
+# RCPT TO:
+#============================================================
+smtpd_recipient_restrictions =
+        permit_sasl_authenticated
+        check_policy_service unix:private/policy-spf
+        check_client_access hash:/etc/postfix/map/client_access
+        reject_unauth_destination
+        check_policy_service unix:private/policy-spf
+        reject_non_fqdn_recipient
+        reject_rhsbl_recipient
+        reject_unknown_recipient_domain
+        reject_unlisted_recipient
+        permit
+inet_protocols = ipv4
